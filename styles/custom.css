@@ -1,0 +1,133 @@
+
+<style>
+
+.jp-MarkdownCell strong {
+    font-weight: 500; /* Or any weight less than the default 700 used for bold */
+}
+
+.jp-MarkdownCell h1 {
+    font-size: 24pt;
+    color: #003366;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 5px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.jp-MarkdownCell h2 {
+    font-size: 20pt;
+    color: #003366;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.jp-MarkdownCell h3 {
+    font-size: 16pt;
+    color: #003366;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.jp-MarkdownCell h4 {
+    font-size: 14pt;
+    color: #000000;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.jp-MarkdownCell h5 {
+    font-size: 14pt;
+    color: #000000;
+    border-bottom: 2px solid;
+    border-top: 2px solid;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    font-weight: 400;
+}
+
+.jp-MarkdownCell h6 {
+    font-size: 14pt;
+    color: #000000;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    font-weight: 400;
+}
+
+
+.jp-MarkdownCell p {
+    font-size: 14pt;
+    /*font-family: 'Computer Modern', 'Latin Modern', serif;/**/
+    color: #000000;
+    text-align: justify;
+    line-height: 1.5;
+}
+
+.jp-MarkdownCell li {
+    font-size: 14pt;
+    /*font-family: 'Computer Modern', 'Latin Modern', serif;/**/
+    color: #000000;
+    /*text-align: justify;*/
+    /*line-height: 1.5;*/
+}
+
+.jp-CodeCell {
+    background-color: #ffffff; 
+    color: #000000;
+    /*border: 1px solid #eaeaea;*/
+}
+
+.jp-CodeMirrorEditor .CodeMirror {
+    font-family: 'Consolas', monospace;
+    font-size: 11pt;
+    /*max-width: 994px; /* Setting max width for code editor */
+    /*margin-left: 20px; /* Center align the editor */
+}
+
+.jp-RenderedText, .jp-OutputArea-output, .jp-CodeCell, .jp-MarkdownCell {
+    background-color: #ffffff; 
+    max-width: 1400px; /* A4 width in pixels */
+    margin-left: 20px; /* Center align the block */
+    /*margin-right: auto; /* Center align the block */
+}
+
+.jp-OutputArea-output img {
+    max-width: 100%;
+    height: auto;
+}
+
+
+/* table settings*/
+.jp-RenderedHTMLCommon table {
+    border-collapse: collapse;
+    width: 98%;
+    margin-left: auto;
+    border: 1px solid #d3d3d3; /* Light grey border */
+    font-size: 16px; /* Readable font size */
+}
+
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td {
+    border: 1px solid #d3d3d3;
+    padding: 8px 12px; /* Adequate padding for content */
+    text-align: center; /* Align text to the left for readability */
+}
+
+.jp-RenderedHTMLCommon thead th {
+    background-color: #f5f5f5; /* Light grey background for header cells */
+    color: #333; /* Dark grey text for contrast */
+    font-weight: bold; /* Make header text bold */
+}
+
+.jp-RenderedHTMLCommon tbody tr:nth-child(even) {
+    background-color: #fafafa; /* Zebra-striping for rows */
+}
+
+.jp-RenderedHTMLCommon tbody tr:hover {
+    background-color: #eaeaea; /* Slightly darker row highlight on hover */
+}
+
+.jp-RenderedHTMLCommon th {
+    position: sticky;
+    top: 0; /* Keep the header on top while scrolling */
+}
+</style>
