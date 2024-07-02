@@ -14,8 +14,8 @@ This repository contains the environment setup for my thesis, including all depe
 First, clone the repository to your local machine:
 
 ```sh
-git clone https://github.com/yourusername/your-repo.git
-cd your-repo
+git clone https://github.com/allwinlucious/MasterThesis
+cd MasterThesis
 ```
 
 ### Build the Docker Image
@@ -67,8 +67,9 @@ For further assistance, feel free to open an issue on this repository.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the BSD 3-Clause License
+ - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
-If you have any questions or suggestions, please contact [your-email@example.com](mailto:your-email@example.com).
+If you have any questions or suggestions, please contact [allwinlucious@gmail.com](mailto:allwinlucious@gmail.com).
