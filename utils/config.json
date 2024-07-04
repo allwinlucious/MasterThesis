@@ -1,0 +1,7 @@
+{
+    "datasets": {
+        "analytical_dataset": {"link": "https://onedrive.live.com/download?resid=25AE0A0F66FB9B60%212826&authkey=!AG4E4gZ9vvE4bb4", "path": "/mnt/data/analytical"},
+        "dataset2": {"link": "DIRECT_DOWNLOAD_LINK_2", "path": "/mnt/data/folder2"}
+    }
+}
+
