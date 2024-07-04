@@ -7,11 +7,21 @@ RUN pip install jupyter
 # Copy the requirements.txt file into the container
 COPY requirements.txt /tmp/
 
+COPY dependencies/pandoc.deb /tmp/
+# Install the Pandoc .deb package
+
+# Copy notebook files into the container
+COPY . /home/jovyan/work
+
+
+RUN pip install nbconvert
+RUN dpkg -i /tmp/pandoc.deb || apt-get install -y -f
+
 # Install additional dependencies
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy your notebook files into the container
-COPY . /home/jovyan/work
+
+
 
 # Set the working directory
 WORKDIR /home/jovyan/work
