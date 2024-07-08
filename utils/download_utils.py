@@ -5,7 +5,7 @@ import io
 from tqdm.notebook import tqdm
 import json
 
-def download_and_extract_zip(keyword, config_file='/utils/config.json'):
+def download_and_extract_zip(keyword, config_file="./utils/config.json"):
     """
     Download a zip file based on a keyword by looking up the URL and path in a config file,
     then extract it to the specified directory.
@@ -41,7 +41,7 @@ def download_and_extract_zip(keyword, config_file='/utils/config.json'):
 
         # Download the file in chunks and update the progress bar
         chunk_size = 1024  # 1 KB chunks
-        for chunk in tqdm(response.iter_content(chunk_size), total=total_size // chunk_size, unit='KB', colour = "blue"):
+        for chunk in tqdm(response.iter_content(chunk_size), total=total_size // chunk_size,  desc="downloading data",unit='KB', colour = "blue",leave=False):
             file_like_object.write(chunk)
         
         # Set the file_like_object position to the beginning
