@@ -1,12 +1,21 @@
-import pandas
+import pandas as pd
 import csv
 import numpy as np
 import math
 from scipy.signal import butter, filtfilt
 import json
 import sys
+import os
+from matplotlib import pyplot as plt
+from scipy.optimize import curve_fit
+from tqdm.notebook import tqdm
 
-
+count_to_deg = 360/(2**24)
+radian_to_deg = 180/np.pi
+axis = 3
+gear_ratio = 101
+offset_m = -462313317
+offset_l = 1144971
 count_to_deg = 360/(2**24)
 radian_to_deg = 180/np.pi
 
@@ -88,23 +97,21 @@ def resample2(df,num_points):
     df = df.reset_index(drop=True)
     return df
 
-def number_of_motor_turns(mot_enc,load_enc,offset_m,offset_l,gear_ratio = 121):
+def number_of_motor_turns(mot_enc,load_enc,offset_m,offset_l,gear_ratio = 101):
     return ((load_enc - offset_l)*gear_ratio + offset_m)//2**24 - mot_enc//2**24
     
-def multiturn_compensation(df,offset_m,offset_l,gear_ratio=121):
-    ##check if starting position is at 0°
-    if np.isclose(0,-6.47897e-05,atol=1e-04): 
-        n = number_of_motor_turns(df.encoder_motorinc_3[0],df.encoder_loadinc_3[0],offset_m,offset_l,gear_ratio)
-        if n == 0:
-            #print("no offset compensation required")
-            return df
-        else:
-            #print("compensating offset")
-            df.encoder_motorinc_3 += n * 2**24
-            return df
-    else:
-        #print("starting data point is not near 0°")
-        pass
+def multiturn_compensation(df,offset_m,offset_l,gear_ratio=101):
+    
+    
+	n = number_of_motor_turns(df.encoder_motorinc_3[0],df.encoder_loadinc_3[0],offset_m,offset_l,gear_ratio)
+	if n == 0:
+	    #print("no offset compensation required")
+	    return df
+	else:
+	    #print("compensating offset")
+	    df.encoder_motorinc_3 += n * 2**24
+	    return df
+
 
 def offset_compensation(df,offset_m,offset_l):
     #reduce offsets from df motorenc and load enc
@@ -130,7 +137,7 @@ def filter(data,fc):
     data["filtered_joint_velocity"] = filtfilt(b, a, data.joint_velocity_3)
     return data
 
-def model_footprint(data, gear_ratio = 121):
+def model_footprint(data, gear_ratio = 101):
     mot_enc = data.filtered_motor_enc.values*count_to_deg
     load_enc = data.filtered_load_enc.values*count_to_deg 
 
@@ -139,7 +146,7 @@ def model_footprint(data, gear_ratio = 121):
 
     # Calculating the fourier_Constants of the Fourier Series (sine and cosine terms)
     fourier_harmonic = 30
-    omega_m = [1, 2, 1-1/121, 2-2/121, 4-4/121, 4, 6-6/121, 6, 8-8/121, 10-10/121]
+    omega_m = [1, 2, 1-1/101, 2-2/101, 4-4/101, 4, 6-6/101, 6, 8-8/101, 10-10/101]
     size_high_freq = len(omega_m)
     size_dataset = len(mot_enc); 
     fourier_Constants = np.zeros((size_dataset , 2 * (fourier_harmonic + size_high_freq) ))
@@ -175,7 +182,7 @@ def footprint_error(coeff,mot_enc,load_enc):
     mot_enc = mot_enc*count_to_deg
     load_enc = load_enc*count_to_deg
     fourier_harmonic = 30
-    omega_m = [1, 2, 1-1/121, 2-2/121, 4-4/121, 4, 6-6/121, 6, 8-8/121, 10-10/121]
+    omega_m = [1, 2, 1-1/101, 2-2/101, 4-4/101, 4, 6-6/101, 6, 8-8/101, 10-10/101]
     size_high_freq = len(omega_m)
     error = 0
     for j in range(0, fourier_harmonic ):
@@ -245,10 +252,98 @@ def torque_to_encoder_error(torque):
     
 def controller_friction_estimate(velocity):
 
-    friction_estimator = FrictionEstimator("lara8", 6, "./utils/friction_parameters_lara8.json")
+    friction_estimator = FrictionEstimator("lara8", 6, "./utils/analytical/friction_parameters_lara8.json")
     return friction_estimator.compute_friction_torques([0.0, 0.0, 0.0, velocity, 0.0, 0.0, 0.0])[3]
 
 def compute_sign(velocity, threshold):
-    friction_estimator =FrictionEstimator("lara8", 6, "./utils/friction_parameters_lara8.json")
+    friction_estimator =FrictionEstimator("lara8", 6, "./utils/analytical/friction_parameters_lara8.json")
     return friction_estimator.compute_sign_with_threshold(velocity, threshold)
+
+def preprocess(base_dir = '/mnt/data/analytical/lara8_90deg_0load/',output_dir = '/mnt/data/analytical/preprocessed/'):
+
+
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Define the columns you want to read
+    columns_to_read = ["encoder_motorinc_3" , "encoder_loadinc_3", "joint_velocity_3","joint_torque_current_3","target_joint_torque_3","joint_angles_3",
+                "fts_reading_1","fts_reading_2","fts_reading_3","fts_reading_4","fts_reading_5","fts_reading_6"] # replace with your actual column names
+
+    # Get the list of subdirectories
+    subdirs = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d))]
+
+    for subdir in subdirs:
+    # Define the paths to the positive and negative CSV files
+        pos_file = os.path.join(base_dir, subdir, 'positive.csv')
+        neg_file = os.path.join(base_dir, subdir, 'negative.csv')
+
+    # Check if both files exist
+    if os.path.exists(pos_file) and os.path.exists(neg_file):
+        try:
+            # Create an inner progress bar for reading and concatenating files
+            with tqdm(total=3, desc=f"Processing {subdir}", leave=False) as pbar:
+                # Read the CSV files with specified columns
+                pos_df = pd.read_csv(pos_file, encoding='ISO-8859-1', usecols=columns_to_read)
+                pbar.update(1)
+
+                neg_df = pd.read_csv(neg_file, encoding='ISO-8859-1', usecols=columns_to_read)
+                pbar.update(1)
+
+                # Concatenate the dataframes
+                combined_df = pd.concat([pos_df, neg_df])
+                # Replace 'inf' values with 'NaN'
+                combined_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+                # Remove rows with 'NaN' values
+                combined_df.dropna(inplace=True)
+                pbar.update(1)
+
+                # Save the combined dataframe to a new CSV file in the data folder
+                combined_df.to_csv(os.path.join(output_dir, f'{subdir}.csv'), index=False)
+        except pd.errors.ParserError as e:
+            print(f"Error parsing files in directory {subdir}: {e}")
+        except Exception as e:
+            print(f"Unexpected error with files in directory {subdir}: {e}")
+
+	# Define the directory containing the combined CSV files
+    directory = '/mnt/data/analytical/preprocessed/'
+
+	# List all CSV files in the directory that end with '.csv'
+    csv_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
+
+	# Initialize an empty dictionary to store the dataframes
+    data = {}
+
+	# Loop over each CSV file
+    for file in tqdm(csv_files, desc="preprocessing", colour= "green"):
+        try:
+            # Read each CSV file into a dataframe
+            df = pd.read_csv(os.path.join(directory, file))
+
+            # Store the dataframe in the dictionary
+            # Use the filename (without .csv) as the key
+            key = os.path.splitext(file)[0]
+            data[key] = df
+            #print(f"Loaded {key}")
+        except Exception as e:
+            print(f"Error loading {file}: {e}")
+
+    min_length = None
+    min_length_key = None
+    for key in data:
+        df = data[key]
+        length = len(df)
+        if min_length is None or length < min_length:
+            min_length = length
+            min_length_key = key
+	#print("The smallest dataframe is ", key, " and has ", min_length, " rows.")
+	#resample to create equal length dataframes
+    for key in data:
+        data[key]= resample2(data[key],min_length)
+    for key in data:
+        data[key]= multiturn_compensation(data[key],offset_m,offset_l)
+    #offset compensation
+    for key in data:
+        data[key]= offset_compensation(data[key],offset_m,offset_l)
+    return data
 
