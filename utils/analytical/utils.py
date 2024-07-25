@@ -261,13 +261,12 @@ def compute_sign(velocity, threshold):
 
 def preprocess(base_dir = '/mnt/data/analytical/lara8_90deg_0load/',output_dir = '/mnt/data/analytical/preprocessed/'):
 
-
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
     # Define the columns you want to read
     columns_to_read = ["encoder_motorinc_3" , "encoder_loadinc_3", "joint_velocity_3","joint_torque_current_3","target_joint_torque_3","joint_angles_3",
-                "fts_reading_1","fts_reading_2","fts_reading_3","fts_reading_4","fts_reading_5","fts_reading_6"] # replace with your actual column names
+                "fts_reading_1","fts_reading_2","fts_reading_3","fts_reading_4","fts_reading_5","fts_reading_6"] 
 
     # Get the list of subdirectories
     subdirs = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d))]
@@ -277,33 +276,33 @@ def preprocess(base_dir = '/mnt/data/analytical/lara8_90deg_0load/',output_dir =
         pos_file = os.path.join(base_dir, subdir, 'positive.csv')
         neg_file = os.path.join(base_dir, subdir, 'negative.csv')
 
-    # Check if both files exist
-    if os.path.exists(pos_file) and os.path.exists(neg_file):
-        try:
-            # Create an inner progress bar for reading and concatenating files
-            with tqdm(total=3, desc=f"Processing {subdir}", leave=False) as pbar:
-                # Read the CSV files with specified columns
-                pos_df = pd.read_csv(pos_file, encoding='ISO-8859-1', usecols=columns_to_read)
-                pbar.update(1)
+        # Check if both files exist
+        if os.path.exists(pos_file) and os.path.exists(neg_file):
+            try:
+                # Create an inner progress bar for reading and concatenating files
+                with tqdm(total=3, desc=f"Processing {subdir}", leave=False) as pbar:
+                    # Read the CSV files with specified columns
+                    pos_df = pd.read_csv(pos_file, encoding='ISO-8859-1', usecols=columns_to_read)
+                    pbar.update(1)
 
-                neg_df = pd.read_csv(neg_file, encoding='ISO-8859-1', usecols=columns_to_read)
-                pbar.update(1)
+                    neg_df = pd.read_csv(neg_file, encoding='ISO-8859-1', usecols=columns_to_read)
+                    pbar.update(1)
 
-                # Concatenate the dataframes
-                combined_df = pd.concat([pos_df, neg_df])
-                # Replace 'inf' values with 'NaN'
-                combined_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+                    # Concatenate the dataframes
+                    combined_df = pd.concat([pos_df, neg_df])
+                    # Replace 'inf' values with 'NaN'
+                    combined_df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-                # Remove rows with 'NaN' values
-                combined_df.dropna(inplace=True)
-                pbar.update(1)
+                    # Remove rows with 'NaN' values
+                    combined_df.dropna(inplace=True)
+                    pbar.update(1)
 
-                # Save the combined dataframe to a new CSV file in the data folder
-                combined_df.to_csv(os.path.join(output_dir, f'{subdir}.csv'), index=False)
-        except pd.errors.ParserError as e:
-            print(f"Error parsing files in directory {subdir}: {e}")
-        except Exception as e:
-            print(f"Unexpected error with files in directory {subdir}: {e}")
+                    # Save the combined dataframe to a new CSV file in the data folder
+                    combined_df.to_csv(os.path.join(output_dir, f'{subdir}.csv'), index=False)
+            except pd.errors.ParserError as e:
+                print(f"Error parsing files in directory {subdir}: {e}")
+            except Exception as e:
+                print(f"Unexpected error with files in directory {subdir}: {e}")
 
 	# Define the directory containing the combined CSV files
     directory = '/mnt/data/analytical/preprocessed/'
