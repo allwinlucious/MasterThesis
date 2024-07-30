@@ -279,26 +279,22 @@ def preprocess(base_dir = '/mnt/data/analytical/lara8_90deg_0load/',output_dir =
         # Check if both files exist
         if os.path.exists(pos_file) and os.path.exists(neg_file):
             try:
-                # Create an inner progress bar for reading and concatenating files
-                with tqdm(total=3, desc=f"Processing {subdir}", leave=False) as pbar:
-                    # Read the CSV files with specified columns
-                    pos_df = pd.read_csv(pos_file, encoding='ISO-8859-1', usecols=columns_to_read)
-                    pbar.update(1)
+            # Create an inner progress bar for reading and concatenating files
+                # Read the CSV files with specified columns
+                pos_df = pd.read_csv(pos_file, encoding='ISO-8859-1', usecols=columns_to_read)
 
-                    neg_df = pd.read_csv(neg_file, encoding='ISO-8859-1', usecols=columns_to_read)
-                    pbar.update(1)
+                neg_df = pd.read_csv(neg_file, encoding='ISO-8859-1', usecols=columns_to_read)
 
-                    # Concatenate the dataframes
-                    combined_df = pd.concat([pos_df, neg_df])
-                    # Replace 'inf' values with 'NaN'
-                    combined_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+                # Concatenate the dataframes
+                combined_df = pd.concat([pos_df, neg_df])
+                # Replace 'inf' values with 'NaN'
+                combined_df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-                    # Remove rows with 'NaN' values
-                    combined_df.dropna(inplace=True)
-                    pbar.update(1)
+                # Remove rows with 'NaN' values
+                combined_df.dropna(inplace=True)
 
-                    # Save the combined dataframe to a new CSV file in the data folder
-                    combined_df.to_csv(os.path.join(output_dir, f'{subdir}.csv'), index=False)
+                # Save the combined dataframe to a new CSV file in the data folder
+                combined_df.to_csv(os.path.join(output_dir, f'{subdir}.csv'), index=False)
             except pd.errors.ParserError as e:
                 print(f"Error parsing files in directory {subdir}: {e}")
             except Exception as e:
