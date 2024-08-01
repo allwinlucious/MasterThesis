@@ -171,11 +171,12 @@ def model_footprint(data, gear_ratio = 101):
 
     residualerror = error - err_calculated
     rms_value_residual = np.sqrt(np.mean(np.square(residualerror)))
-    print("RMS value residual error:", rms_value_residual)
+    #print("RMS value residual error:", rms_value_residual)
     rms_value_actual = np.sqrt(np.mean(np.square(error)))
-    print("RMS value actual error:", rms_value_actual)
+    #print("RMS value actual error:", rms_value_actual)
     if(rms_value_residual < rms_value_actual):
-        print('The Model has reduced the error')
+       pass
+        # print('The Model has reduced the error')
     return coeff
 
 def footprint_error(coeff,mot_enc,load_enc):
@@ -282,9 +283,9 @@ def preprocess(base_dir = '/mnt/data/analytical/lara8_90deg_0load/',output_dir =
             # Create an inner progress bar for reading and concatenating files
                 # Read the CSV files with specified columns
                 pos_df = pd.read_csv(pos_file, encoding='ISO-8859-1', usecols=columns_to_read)
-
+                pos_df = pos_df[100:-100]
                 neg_df = pd.read_csv(neg_file, encoding='ISO-8859-1', usecols=columns_to_read)
-
+                neg_df = neg_df[100:-100]
                 # Concatenate the dataframes
                 combined_df = pd.concat([pos_df, neg_df])
                 # Replace 'inf' values with 'NaN'
@@ -314,7 +315,6 @@ def preprocess(base_dir = '/mnt/data/analytical/lara8_90deg_0load/',output_dir =
         try:
             # Read each CSV file into a dataframe
             df = pd.read_csv(os.path.join(directory, file))
-
             # Store the dataframe in the dictionary
             # Use the filename (without .csv) as the key
             key = os.path.splitext(file)[0]
