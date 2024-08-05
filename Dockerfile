@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
     texlive-xetex \
     texlive-fonts-recommended \
     texlive-plain-generic \
+    dvipng \
+    cm-super \
+    graphviz \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,6 +25,8 @@ RUN dpkg -i /tmp/pandoc.deb || apt-get install -y -f
 # Install nbconvert and additional dependencies
 RUN pip install nbconvert
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 # Copy notebook files into the container
 COPY . /home/jovyan/work
