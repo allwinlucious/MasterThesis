@@ -1,7 +1,7 @@
 {
     "datasets": {
         "analytical_dataset": {"link":"https://github.com/allwinlucious/MasterThesis/releases/download/analytical/lara8_90deg_0load.zip", "path": "/mnt/data/analytical"},
-        "dataset2": {"link": "DIRECT_DOWNLOAD_LINK_2", "path": "/mnt/data/folder2"}
+        "ML1": {"link": "https://github.com/allwinlucious/MasterThesis/releases/download/ML1/data_for_ML1.zip", "path": "/mnt/data/ML1"}
     }
 }
 
