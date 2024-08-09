@@ -183,4 +183,91 @@ def compute_geometric_jacobian(joint_angles,dh_params = dh_params):
 
     return jacobian
 
+def plot_joint_torques(pred_list):
+    input_df = pd.read_csv('utils/ML2/validation.csv')
+    pred_df = pd.DataFrame(pred_list, columns = ['Fx', 'Fy', 'Fz', 'Tx', 'Ty', 'Tz'])
+    #create empty arrays to store the results
+    measured_external_force = np.zeros((len(input_df),6))
+    calculated_external_force = np.zeros((len(input_df),6))
+    estimated_external_force = np.zeros((len(input_df),6))
+    
+    for i, row in input_df.iterrows():
+    
+        joint_angle = row[["joint_angles_1","joint_angles_2","joint_angles_3","joint_angles_4","joint_angles_5","joint_angles_6"]].values
+        joint_angle = np.array(joint_angle)
+        #print(joint_angle)
+        jacobian = compute_geometric_jacobian(joint_angle)
+        
+    
+        joint_torque = row[["joint_torque_current_1","joint_torque_current_2","joint_torque_current_3","joint_torque_current_4","joint_torque_current_5","joint_torque_current_6"]].values
+        joint_torque = np.array(joint_torque)
+    
+        idyn_torque = row[["target_joint_torque_1","target_joint_torque_2","target_joint_torque_3","target_joint_torque_4","target_joint_torque_5","target_joint_torque_6"]].values
+        idyn_torque = np.array(idyn_torque)
+        
+        fts_reading = row[["fts_reading_1","fts_reading_2","fts_reading_3","fts_reading_4","fts_reading_5","fts_reading_6"]]
+        fts_reading = np.array(fts_reading)
+        
+        measured_external_force[i] = jacobian.T@fts_reading
+        calculated_external_force[i] = joint_torque - idyn_torque
+        try:
+            estimated_external_force[i] = jacobian.T@pred_df.iloc[i].values # the dropna in the dataset will cause the index to be different could cause shifts in plot
+        except Exception as e:
+            continue
+        
+    
+       
+    #plot the results
+    fig, axes = plt.subplots(3, 2, figsize=(10, 15))
+    fig.suptitle('Comparison of measured (FTS), calculated (Motor torque - IDYN) \n and estimated (ML model)external forces and torques')
+    axes[0, 0].plot(measured_external_force[:,0],label="measured", color = "green")
+    axes[0, 0].plot(calculated_external_force[:,0],label="calculated",alpha=0.5,color = "orange")
+    axes[0, 0].plot(estimated_external_force[:,0],label="estimated",color = "blue")
+    axes[0, 0].set_title('Joint 1')
 
+    axes[0, 0].set_xlabel('idx')
+    axes[0, 0].set_ylabel('Force(N)')
+    
+    axes[0, 1].plot(-measured_external_force[:,1],label="-measured", color = "green")
+    axes[0, 1].plot(calculated_external_force[:,1],label="calculated",alpha=0.5,color = "orange")
+    axes[0, 1].plot(-estimated_external_force[:,1],label="-estimated",color = "blue")
+    axes[0, 1].set_title('Joint 2')
+
+    axes[0, 1].set_xlabel('idx')
+    axes[0, 1].set_ylabel('Force(N)')
+    
+    axes[1, 0].plot(measured_external_force[:,2],label="measured", color = "green")
+    axes[1, 0].plot(calculated_external_force[:,2],label="calculated",alpha=0.5,color = "orange")
+    axes[1, 0].plot(estimated_external_force[:,2],label="estimated",color = "blue")
+    axes[1, 0].set_title('Joint 3')
+
+    axes[1, 0].set_xlabel('idx')
+    axes[1, 0].set_ylabel('Force(N)')
+    
+    axes[1, 1].plot(measured_external_force[:,3],label="measured", color = "green")
+    axes[1, 1].plot(calculated_external_force[:,3],label="calculated",alpha=0.5,color = "orange")
+    axes[1, 1].plot(estimated_external_force[:,3],label="estimated",color = "blue")
+    axes[1, 1].set_title('Joint 4')
+    axes[1, 1].set_xlabel('idx')
+    axes[1, 1].set_ylabel('Torque(N.m)')
+    
+    axes[2, 0].plot(measured_external_force[:,4],label="measured", color = "green")
+    axes[2, 0].plot(calculated_external_force[:,4],label="calculated",alpha=0.5,color = "orange")
+    axes[2, 0].plot(estimated_external_force[:,4],label="estimated",color = "blue")
+    axes[2, 0].set_title('Joint 5')
+    axes[2, 0].set_xlabel('idx')
+    axes[2, 0].set_ylabel('Torque(N.m)')
+    axes[2, 0].set_xlabel('idx')
+    axes[2, 0].set_ylabel('Torque(N.m)')
+    
+    axes[2, 1].plot(measured_external_force[:,5],label="measured", color = "green")
+    axes[2, 1].plot(calculated_external_force[:,5],label="calculated",alpha=0.5,color = "orange")
+    axes[2, 1].plot(estimated_external_force[:,5],label="estimated",color = "blue")
+    axes[2, 1].set_title('Joint 6')
+    axes[2, 1].set_xlabel('idx')
+    axes[2, 1].set_ylabel('Torque(N.m)')
+    axes[2, 1].set_xlabel('idx')
+    axes[2, 1].set_ylabel('Torque(N.m)')
+    axes[0, 1].legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.tight_layout(rect=[0, 0, 0.85, 1]) 
+    plt.show()
