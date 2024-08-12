@@ -215,59 +215,31 @@ def plot_joint_torques(pred_list):
         except Exception as e:
             continue
         
-    
+    rms_error_pred_measured = np.sqrt(np.mean((measured_external_force - estimated_external_force) ** 2, axis=0))
+    rms_error_calc_measured = np.sqrt(np.mean((measured_external_force - calculated_external_force) ** 2, axis=0))
+
+    print("RMS Error between prediction and measured:", rms_error_pred_measured)
+    print("RMS Error between calculated and measured:", rms_error_calc_measured)
        
-    #plot the results
+    # Plot the results
     fig, axes = plt.subplots(3, 2, figsize=(10, 15))
-    fig.suptitle('Comparison of measured (FTS), calculated (Motor torque - IDYN) \n and estimated (ML model)external forces and torques')
-    axes[0, 0].plot(measured_external_force[:,0],label="measured", color = "green")
-    axes[0, 0].plot(calculated_external_force[:,0],label="calculated",alpha=0.5,color = "orange")
-    axes[0, 0].plot(estimated_external_force[:,0],label="estimated",color = "blue")
-    axes[0, 0].set_title('Joint 1')
-
-    axes[0, 0].set_xlabel('idx')
-    axes[0, 0].set_ylabel('Force(N)')
+    fig.suptitle('Comparison of measured (FTS), calculated (Motor torque - IDYN) \n and estimated (ML model) external forces and torques')
     
-    axes[0, 1].plot(-measured_external_force[:,1],label="-measured", color = "green")
-    axes[0, 1].plot(calculated_external_force[:,1],label="calculated",alpha=0.5,color = "orange")
-    axes[0, 1].plot(-estimated_external_force[:,1],label="-estimated",color = "blue")
-    axes[0, 1].set_title('Joint 2')
-
-    axes[0, 1].set_xlabel('idx')
-    axes[0, 1].set_ylabel('Force(N)')
+    # Define the color scheme
+    colors = {"calculated": "#E69F00", "measured": "#009E73", "estimated": "#0072B2"}
     
-    axes[1, 0].plot(measured_external_force[:,2],label="measured", color = "green")
-    axes[1, 0].plot(calculated_external_force[:,2],label="calculated",alpha=0.5,color = "orange")
-    axes[1, 0].plot(estimated_external_force[:,2],label="estimated",color = "blue")
-    axes[1, 0].set_title('Joint 3')
-
-    axes[1, 0].set_xlabel('idx')
-    axes[1, 0].set_ylabel('Force(N)')
+    # Plotting for all joints
+    for i in range(3):
+        for j in range(2):
+            idx = i * 2 + j
+            axes[i, j].plot(calculated_external_force[:, idx], label="calculated", alpha=0.5, color=colors["calculated"])
+            axes[i, j].plot(measured_external_force[:, idx], label="measured", color=colors["measured"])
+            axes[i, j].plot(estimated_external_force[:, idx], label="estimated", color=colors["estimated"])
+            axes[i, j].set_title(f'Joint {idx + 1}')
+            axes[i, j].set_xlabel('idx')
+            axes[i, j].set_ylabel('Force(N)' if idx < 4 else 'Torque(N.m)')
     
-    axes[1, 1].plot(measured_external_force[:,3],label="measured", color = "green")
-    axes[1, 1].plot(calculated_external_force[:,3],label="calculated",alpha=0.5,color = "orange")
-    axes[1, 1].plot(estimated_external_force[:,3],label="estimated",color = "blue")
-    axes[1, 1].set_title('Joint 4')
-    axes[1, 1].set_xlabel('idx')
-    axes[1, 1].set_ylabel('Torque(N.m)')
-    
-    axes[2, 0].plot(measured_external_force[:,4],label="measured", color = "green")
-    axes[2, 0].plot(calculated_external_force[:,4],label="calculated",alpha=0.5,color = "orange")
-    axes[2, 0].plot(estimated_external_force[:,4],label="estimated",color = "blue")
-    axes[2, 0].set_title('Joint 5')
-    axes[2, 0].set_xlabel('idx')
-    axes[2, 0].set_ylabel('Torque(N.m)')
-    axes[2, 0].set_xlabel('idx')
-    axes[2, 0].set_ylabel('Torque(N.m)')
-    
-    axes[2, 1].plot(measured_external_force[:,5],label="measured", color = "green")
-    axes[2, 1].plot(calculated_external_force[:,5],label="calculated",alpha=0.5,color = "orange")
-    axes[2, 1].plot(estimated_external_force[:,5],label="estimated",color = "blue")
-    axes[2, 1].set_title('Joint 6')
-    axes[2, 1].set_xlabel('idx')
-    axes[2, 1].set_ylabel('Torque(N.m)')
-    axes[2, 1].set_xlabel('idx')
-    axes[2, 1].set_ylabel('Torque(N.m)')
     axes[0, 1].legend(loc='upper left', bbox_to_anchor=(1, 1))
-    plt.tight_layout(rect=[0, 0, 0.85, 1]) 
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
     plt.show()
+
