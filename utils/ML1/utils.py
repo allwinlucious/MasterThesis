@@ -12,6 +12,8 @@ from tqdm import tqdm
 from torchview import draw_graph
 from utils.ML1.model_defenitions import NN, RNN, LSTM, GRU
 from PIL import Image
+from IPython.display import display
+from IPython.display import Image as IPImage
 import io
 count_to_deg = 360/(2**24)
 radian_to_deg = 180/np.pi
@@ -234,4 +236,16 @@ class CustomDatasetFromCSV(Dataset):
 
     def __len__(self):
         return self.length
-# Updated DH parameters based on the provided table
+
+def show_test_graphs():
+    model_folders = ['fts_GRU', 'fts_RNN', 'fts_LSTM', 'fts_NN']  # Add any other model folders as needed
+    base_path = "utils/ML1"
+    for model in model_folders:
+        test_folder = os.path.join(base_path, model)
+        graph_path = os.path.join(test_folder, 'plots', 'test.png')
+        
+        if os.path.exists(graph_path):
+            #print(f"Displaying graph for {model}:")
+            display(IPImage(filename=graph_path))
+        else:
+            print(f"No graph found for {model} in {graph_path}")
