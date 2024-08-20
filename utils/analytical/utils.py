@@ -6,7 +6,6 @@ from scipy.signal import butter, filtfilt
 import json
 import sys
 import os
-from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from tqdm.notebook import tqdm
 

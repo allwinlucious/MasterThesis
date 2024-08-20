@@ -146,13 +146,13 @@ dh_params = [
     (0, 0, 0.1735, 0)                 # Link 6
 ]
 
-def compute_geometric_jacobian(joint_angles,dh_params = dh_params):
+def compute_forward_kinematics(joint_angles, dh_params):
     """
-    Compute the geometric Jacobian for a robot given DH parameters and joint angles.
+    Compute the forward kinematics for a robot given DH parameters and joint angles.
 
     :param dh_params: List of DH parameters [(a, alpha, d, theta), ...]
     :param joint_angles: List of joint angles [theta1, theta2, ..., thetaN]
-    :return: Geometric Jacobian matrix (6 x N)
+    :return: List of transformation matrices from base to each joint and the final transformation matrix T_0_n
     """
     num_joints = len(joint_angles)
     T = np.eye(4)
@@ -165,24 +165,48 @@ def compute_geometric_jacobian(joint_angles,dh_params = dh_params):
         T = np.dot(T, T_i)
         transformations.append(T.copy())
     
-    # Initialize Jacobian matrix
-    jacobian = np.zeros((6, num_joints))
+    T_0_n = transformations[-1]  # Final transformation matrix to the TCP (end-effector)
+    return transformations, T_0_n
+def compute_geometric_jacobian(transformations):
+    """
+    Compute the geometric Jacobian for a robot given the transformation matrices.
+
+    :param transformations: List of transformation matrices from the base to each joint
+    :return: Geometric Jacobian matrix (6 x N) in the base frame
+    """
+    num_joints = len(transformations) - 1  # Excluding the base frame
+    jacobian_base = np.zeros((6, num_joints))
     
     # End-effector position
     T_0_n = transformations[-1]
     o_n = T_0_n[:3, 3]
 
-    # Compute each column of the Jacobian
+    # Compute each column of the Jacobian in the base frame
     for i in range(num_joints):
         T_0_i = transformations[i]
         o_i = T_0_i[:3, 3]
         z_i = T_0_i[:3, 2]
 
-        jacobian[:3, i] = np.cross(z_i, (o_n - o_i))  # Linear part
-        jacobian[3:, i] = z_i  # Angular part
+        jacobian_base[:3, i] = np.cross(z_i, (o_n - o_i))  # Linear part
+        jacobian_base[3:, i] = z_i  # Angular part
 
-    return jacobian
-
+    return jacobian_base
+def convert_jacobian_to_tcp(jacobian_base, T_0_n):
+    """
+    Convert a Jacobian from the base frame to the TCP frame.
+    
+    :param jacobian_base: Jacobian matrix in the base frame (6 x 6)
+    :param T_0_n: Transformation matrix from the base to the TCP (4 x 4)
+    :return: Jacobian matrix (6 x 6) in the TCP frame
+    """
+    R_0_n = T_0_n[:3, :3]
+    T_base_to_tcp = np.block([
+        [R_0_n.T, np.zeros((3, 3))],
+        [np.zeros((3, 3)), R_0_n.T]
+    ])
+    
+    jacobian_tcp = np.dot(T_base_to_tcp, jacobian_base)
+    return jacobian_tcp
 def plot_joint_torques(pred_list):
     input_df = pd.read_csv('utils/ML2/validation.csv')
     pred_df = pd.DataFrame(pred_list, columns = ['Fx', 'Fy', 'Fz', 'Tx', 'Ty', 'Tz'])
@@ -196,9 +220,10 @@ def plot_joint_torques(pred_list):
         joint_angle = row[["joint_angles_1","joint_angles_2","joint_angles_3","joint_angles_4","joint_angles_5","joint_angles_6"]].values
         joint_angle = np.array(joint_angle)
         #print(joint_angle)
-        jacobian = compute_geometric_jacobian(joint_angle)
+        transformations,T_0_n = compute_forward_kinematics(joint_angle,dh_params)
+        jacobian = compute_geometric_jacobian(transformations)
+        jacobian = convert_jacobian_to_tcp(jacobian,T_0_n)
         
-    
         joint_torque = row[["joint_torque_current_1","joint_torque_current_2","joint_torque_current_3","joint_torque_current_4","joint_torque_current_5","joint_torque_current_6"]].values
         joint_torque = np.array(joint_torque)
     
@@ -209,7 +234,7 @@ def plot_joint_torques(pred_list):
         fts_reading = np.array(fts_reading)
         
         measured_external_force[i] = jacobian.T@fts_reading
-        calculated_external_force[i] = joint_torque - idyn_torque
+        calculated_external_force[i] = idyn_torque - joint_torque
         try:
             estimated_external_force[i] = jacobian.T@pred_df.iloc[i].values # the dropna in the dataset will cause the index to be different could cause shifts in plot
         except Exception as e:
@@ -237,7 +262,7 @@ def plot_joint_torques(pred_list):
             axes[i, j].plot(estimated_external_force[:, idx], label="estimated", color=colors["estimated"])
             axes[i, j].set_title(f'Joint {idx + 1}')
             axes[i, j].set_xlabel('idx')
-            axes[i, j].set_ylabel('Force(N)' if idx < 4 else 'Torque(N.m)')
+            axes[i, j].set_ylabel('Force[N]' if idx < 4 else 'Torque[N.m]')
     
     axes[0, 1].legend(loc='upper left', bbox_to_anchor=(1, 1))
     plt.tight_layout(rect=[0, 0, 0.85, 1])
