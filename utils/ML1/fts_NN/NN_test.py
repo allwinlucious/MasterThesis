@@ -71,7 +71,7 @@ for i, idx in enumerate(selected_indices):
     axes[i].plot(pred_list[:, idx], label="prediction")
     axes[i].set_title(components[idx])
     axes[i].set_xlabel("index")
-    if i == 4:
+    if idx == 4:
         axes[i].set_ylabel("Nm")
     else:
         axes[i].set_ylabel("N")

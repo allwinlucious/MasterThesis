@@ -247,8 +247,8 @@ def plot_joint_torques(pred_list):
     print("RMS Error between calculated and measured:", rms_error_calc_measured)
        
     # Plot the results
-    fig, axes = plt.subplots(3, 2, figsize=(10, 15))
-    fig.suptitle('Comparison of measured (FTS), calculated (Motor torque - IDYN) \n and estimated (ML model) external forces and torques')
+    fig, axes = plt.subplots(3, 2, figsize=(10, 10))
+    fig.suptitle('Comparison of truth (FTS), motor current based estimation (Motor torque - IDYN) \n and predicted (ML model) external forces and torques')
     
     # Define the color scheme
     colors = {"calculated": "#E69F00", "measured": "#009E73", "estimated": "#0072B2"}
@@ -257,14 +257,14 @@ def plot_joint_torques(pred_list):
     for i in range(3):
         for j in range(2):
             idx = i * 2 + j
-            axes[i, j].plot(calculated_external_force[:, idx], label="calculated", alpha=0.5, color=colors["calculated"])
-            axes[i, j].plot(measured_external_force[:, idx], label="measured", color=colors["measured"])
-            axes[i, j].plot(estimated_external_force[:, idx], label="estimated", color=colors["estimated"])
+            axes[i, j].plot(calculated_external_force[:, idx], label="motor current based estimation", alpha=0.5, color=colors["calculated"])
+            axes[i, j].plot(measured_external_force[:, idx], label="truth", color=colors["measured"])
+            axes[i, j].plot(estimated_external_force[:, idx], label="predicted", color=colors["estimated"])
             axes[i, j].set_title(f'Joint {idx + 1}')
-            axes[i, j].set_xlabel('idx')
-            axes[i, j].set_ylabel('Force[N]' if idx < 4 else 'Torque[N.m]')
+            axes[i, j].set_xlabel('index')
+            axes[i, j].set_ylabel('Torque[N.m]')
     
     axes[0, 1].legend(loc='upper left', bbox_to_anchor=(1, 1))
-    plt.tight_layout(rect=[0, 0, 0.85, 1])
+    plt.tight_layout()
     plt.show()
 

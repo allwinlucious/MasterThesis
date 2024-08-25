@@ -249,3 +249,52 @@ def show_test_graphs():
             display(IPImage(filename=graph_path))
         else:
             print(f"No graph found for {model} in {graph_path}")
+def visualize_models2():
+    # Instantiate the models
+    nn_model = NN(7, 6)
+    rnn_model = RNN(7, 10, 2, 6)
+    lstm_model = LSTM(7, 128, 1, 6)
+    gru_model = GRU(7, 128, 1, 6)
+    
+    # Generate graphs for each model
+    nn_graph = draw_graph(nn_model, input_size=(1, 7), expand_nested=False, show_shapes=True)
+    rnn_graph = draw_graph(rnn_model, input_size=(1,5, 7), expand_nested=False, show_shapes=True)
+    lstm_graph = draw_graph(lstm_model, input_size=(1,5, 7), expand_nested=False, show_shapes=True)
+    gru_graph = draw_graph(gru_model, input_size=(1,5, 7), expand_nested=False, show_shapes=True)
+
+    # Get the visual graphs and convert to a format suitable for Matplotlib
+    nn_vis = Image.open(io.BytesIO(nn_graph.visual_graph.pipe(format='png')))
+    rnn_vis = Image.open(io.BytesIO(rnn_graph.visual_graph.pipe(format='png')))
+    lstm_vis = Image.open(io.BytesIO(lstm_graph.visual_graph.pipe(format='png')))
+    gru_vis = Image.open(io.BytesIO(gru_graph.visual_graph.pipe(format='png')))
+
+    # Function to resize images to the same size
+    def resize_image(img, size=(600, 1500)):
+        return img.resize(size, Image.Resampling.LANCZOS)
+
+    # Resize images
+    nn_vis = resize_image(nn_vis)
+    rnn_vis = resize_image(rnn_vis)
+    lstm_vis = resize_image(lstm_vis)
+    gru_vis = resize_image(gru_vis)
+
+    # Make a subplot with 2 rows and 2 columns for each image
+    fig, axs = plt.subplots(2, 2, figsize=(20, 20))
+    
+    axs[0, 0].imshow(nn_vis)
+    axs[0, 0].set_title("NN")
+    axs[0, 0].axis('off')
+
+    axs[0, 1].imshow(rnn_vis)
+    axs[0, 1].set_title("RNN")
+    axs[0, 1].axis('off')
+
+    axs[1, 0].imshow(lstm_vis)
+    axs[1, 0].set_title("LSTM")
+    axs[1, 0].axis('off')
+
+    axs[1, 1].imshow(gru_vis)
+    axs[1, 1].set_title("GRU")
+    axs[1, 1].axis('off')
+    plt.savefig("subplotmodel.png")
+
