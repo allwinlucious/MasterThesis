@@ -4,8 +4,6 @@ FROM python:3.8
 # Install Jupyter and JupyterLab
 RUN pip install jupyter jupyterlab
 
-# Install Node.js and npm (needed for building JupyterLab extensions)
-RUN apt-get update && apt-get install -y nodejs npm
 
 # Create the custom CSS directory and add your custom CSS
 RUN mkdir -p /root/.jupyter/custom
