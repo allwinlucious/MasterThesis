@@ -7,7 +7,7 @@ from torch.utils.data import  Dataset
 import pandas as pd
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 count_to_deg = 360/(2**24)
 radian_to_deg = 180/np.pi

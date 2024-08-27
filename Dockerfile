@@ -4,6 +4,13 @@ FROM python:3.8
 # Install Jupyter and JupyterLab
 RUN pip install jupyter jupyterlab
 
+# Install Node.js and npm (needed for building JupyterLab extensions)
+RUN apt-get update && apt-get install -y nodejs npm
+
+# Create the custom CSS directory and add your custom CSS
+RUN mkdir -p /root/.jupyter/custom
+COPY styles/custom.css /root/.jupyter/custom/custom.css
+
 # Copy the requirements.txt file into the container
 COPY requirements.txt /tmp/
 
@@ -26,6 +33,7 @@ RUN dpkg -i /tmp/pandoc.deb || apt-get install -y -f
 RUN pip install nbconvert
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
+# Install PyTorch CPU version
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 # Copy notebook files into the container
@@ -37,6 +45,6 @@ WORKDIR /home/jovyan/work
 # Expose the Jupyter port
 EXPOSE 8888
 
-# Run JupyterLab
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ServerApp.token=''", "--ServerApp.root_dir='/home/jovyan/work'", "--ServerApp.open_browser=True"]
+# Run JupyterLab with the --custom-css flag to load the custom CSS
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ServerApp.token=''", "--ServerApp.root_dir='/home/jovyan/work'", "--ServerApp.open_browser=True", "--LabApp.custom_css=True"]
 
