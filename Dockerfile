@@ -9,6 +9,19 @@ RUN pip install jupyter jupyterlab
 RUN mkdir -p /root/.jupyter/custom
 COPY styles/custom.css /root/.jupyter/custom/custom.css
 
+# Copy the zipped settings into the Docker image
+COPY user-settings.zip /root/.jupyter/lab/
+
+# Install unzip if it's not already in the base image
+RUN apt-get update && apt-get install -y unzip
+
+# Unzip the user settings into the appropriate directory
+RUN unzip /root/.jupyter/lab/user-settings.zip -d /root/.jupyter/lab/
+
+# Clean up by removing the zip file
+RUN rm /root/.jupyter/lab/user-settings.zip
+
+
 # Copy the requirements.txt file into the container
 COPY requirements.txt /tmp/
 
