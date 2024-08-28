@@ -91,7 +91,7 @@ def visualize_models():
     gru_vis = Image.open(io.BytesIO(gru_graph.visual_graph.pipe(format='png')))
 
         # Function to resize images to the same size
-    def resize_image(img, size=(400, 1200)):
+    def resize_image(img, size=(500, 1400)):
         return img.resize(size, Image.Resampling.LANCZOS)
 
     # Resize images
@@ -117,7 +117,8 @@ def visualize_models():
     axs[3].imshow(gru_vis)
     axs[3].set_title("GRU")
     axs[3].axis('off')
-
+    caption =  r'$\mathbf{Figure\ 5.2.:}$ Visualization of model architectures.'
+    plt.figtext(0.5, -0.02, caption, ha='center', fontsize=22);
     plt.show()
 
 def dh_transform(a, alpha, d, theta):
@@ -296,5 +297,7 @@ def visualize_models2():
     axs[1, 1].imshow(gru_vis)
     axs[1, 1].set_title("GRU")
     axs[1, 1].axis('off')
+    caption =  r'$\mathbf{Figure\ 5.2.:}$ Visualization of model architectures.'
+    plt.figtext(0.5, -0.02, caption, ha='center', fontsize=12);
     plt.savefig("subplotmodel.png")
 
