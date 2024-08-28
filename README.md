@@ -6,6 +6,7 @@ This repository contains the environment setup for my thesis, including all depe
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) installed on your system
+- **Note**: Depending on your system configuration, you might need to run Docker commands with `sudo` if you encounter permission issues.
 
 ## Setup Instructions
 
@@ -72,4 +73,4 @@ This project is licensed under the BSD 3-Clause License
 
 ## Contact
 
-If you have any questions or suggestions, please contact [allwinlucious@gmail.com](mailto:allwinlucious@gmail.com).
+If you have any questions or suggestions, please contact [allwin.lucious@rwth-aachen.de](mailto:allwinlucious@rwth-aachen.de).

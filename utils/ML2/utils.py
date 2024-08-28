@@ -266,5 +266,7 @@ def plot_joint_torques(pred_list):
     
     axes[0, 1].legend(loc='upper left', bbox_to_anchor=(1, 1))
     plt.tight_layout()
+    caption =  r'$\mathbf{Figure\ 6.4.:}$Comparison of truth(FTS projected to joint space), prediction by ML model and motor current based approach).'
+    plt.figtext(0.5, -0.02, caption, ha='center', fontsize=12)
     plt.show()
 

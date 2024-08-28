@@ -51,8 +51,7 @@ with torch.no_grad():
 y_truth = ((test_dataloader.dataset.y + 1) / 2 * (y_max - y_min) + y_min).cpu().numpy()
 pred_list = torch.cat(pred_list).cpu().numpy()
 
-noise_factor = 0.1  # Adjust this value to control the amount of noise
-pred_list = pred_list + noise_factor * np.random.randn(*pred_list.shape)
+
 components = ['Fx', 'Fy', 'Fz', 'Tx', 'Ty', 'Tz']
 selected_indices = [0, 2, 4]
 
